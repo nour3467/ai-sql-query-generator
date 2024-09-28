@@ -114,6 +114,7 @@ poetry run python src/main.py
 
 ---
 
+
 ## 🧪 Running Tests
 
 Unit tests ensure that the main functionalities are working correctly. To run the tests, simply execute:
@@ -121,6 +122,24 @@ Unit tests ensure that the main functionalities are working correctly. To run th
 ```bash
 poetry run pytest
 ```
+
+### Running Tests with Print Statements
+
+If you'd like to see the `print` statements in real-time during the test execution (which are usually captured by `pytest`), you can disable output capturing using the `-s` flag. This is especially helpful for debugging and understanding the flow of the tests.
+
+For example, to run a specific test and see the output, use the following command:
+
+```bash
+pytest -s tests/test_database_handler.py::test_create_table
+```
+
+This will display output such as:
+
+```
+🚧 Creating table EMPLOYEE in the test database...
+✅ Table 'EMPLOYEE' successfully created.
+```
+
 
 ---
 
