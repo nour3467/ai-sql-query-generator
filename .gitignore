@@ -1,0 +1,9 @@
+# .gitignore file for Python
+# Ignore pycache and .env files
+
+__pycache__
+.env
+
+
+
+./org/

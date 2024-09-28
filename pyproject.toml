@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "ai-sql-query-generator"
+version = "0.1.0"
+description = "A Generative AI-based SQL Query Generator"
+authors = ["Noureddine Ech-chouky <71594772+nour3467@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+langchain = "^0.3.1"
+openai = "^1.50.2"
+streamlit = "^1.38.0"
+google-generativeai = "^0.8.2"
+python-dotenv = "^1.0.1"
+pypdf2 = "^3.0.1"
+chromadb = "^0.5.11"
+faiss-cpu = "^1.8.0.post1"
+pdf2image = "^1.17.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
