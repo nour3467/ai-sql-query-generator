@@ -6,3 +6,5 @@ PyPDF2
 chromadb
 faiss-cpu
 pdf2image
+sqlparse
+spacy

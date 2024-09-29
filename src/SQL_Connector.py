@@ -14,40 +14,37 @@ from database_handler import create_connection
 def run_sql_query(db_name, sql_query):
     """
     Executes a given SQL query on the SQLite database and returns the results.
-
-    :param db_name: str : The path to the SQLite database file.
-    :param sql_query: str : The SQL query to execute.
-    :return: list[dict] : A list of dictionaries representing the rows.
     """
-    conn = None  # Initialize conn to None
+    conn = None
     try:
-        # Step 1: Use the connection from the database_handler
-        conn = create_connection(db_name)
+        # Establish connection to the database
+        conn = sqlite3.connect(db_name)
         cursor = conn.cursor()
 
-        print(f"📝 Running SQL Query: {sql_query}")
+        print(f"📝 Running SQL Query: {sql_query}")  # Debugging: Log the SQL Query
 
-        # Step 2: Execute the query
         cursor.execute(sql_query)
 
-        # Step 3: Fetch all results
-        rows = cursor.fetchall()
+        # Check if it's a SELECT query
+        if cursor.description:  # This means it's a SELECT query
+            rows = cursor.fetchall()
+            column_names = [description[0] for description in cursor.description]
+            results = [dict(zip(column_names, row)) for row in rows]
 
-        # Step 4: Get column names from the cursor
-        column_names = [description[0] for description in cursor.description]
-
-        # Step 5: Convert rows into list of dictionaries
-        results = [dict(zip(column_names, row)) for row in rows]
-
-        print(f"✅ Query executed successfully, retrieved {len(results)} rows.")
-        return results
+            print(f"✅ Query executed successfully, retrieved {len(results)} rows.")
+            return results  # Return the fetched rows
+        else:
+            # For non-SELECT queries (INSERT, UPDATE, DELETE)
+            conn.commit()  # Commit changes to the database
+            print("✅ Non-SELECT query executed successfully.")
+            return []  # Return empty list for non-SELECT queries
 
     except Exception as e:
-        print(f"❌ Error executing SQL query: {e}")
-        raise
+        print(f"❌ Error executing SQL query: {e}")  # Log any error that occurs
+        raise  # Re-raise the exception for handling in the calling function
 
     finally:
-        # Step 6: Ensure the connection is closed properly, only if it was established
         if conn:
             conn.close()
             print("🔒 Database connection closed.")
+

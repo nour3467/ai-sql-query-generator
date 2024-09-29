@@ -89,6 +89,10 @@ Poetry will handle all dependencies (and their exact versions) through the `pypr
 poetry install
 ```
 
+
+python -m spacy download en_core_web_sm
+
+
 ### Step 4: Set Up Environment Variables
 
 Create a `.env` file in the root directory to store your API keys and other environment variables. Example:
