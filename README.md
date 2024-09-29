@@ -215,3 +215,5 @@ If you have any questions, feel free to reach out:
 1. **v1.0.x**: Basic functionality with SQLite support and simple query generation.
 2. **v2.x.x**: Multi-database support (PostgreSQL, MySQL), fine-tuning models for specific use cases.
 3. **v3.x.x**: Full AI-powered query optimization and insights generation (e.g., analytics, recommendations).
+
+

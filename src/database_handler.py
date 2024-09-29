@@ -8,6 +8,7 @@ Generalized module to handle all database operations like table creation, and CR
 import os
 import sqlite3
 
+
 # --- Connection Management ---
 def create_connection(db_name):
     """
@@ -17,12 +18,19 @@ def create_connection(db_name):
     @return: sqlite3.Connection : The connection object to the SQLite database.
     """
     # Ensure the 'data' directory exists 📁
-    if not os.path.exists('data'):
-        os.makedirs('data')
+    if not os.path.exists("data"):
+        os.makedirs("data")
         print("📂 'data' directory created.")
 
-    print(f"🔌 Connecting to database: {db_name}")
-    return sqlite3.connect(db_name)
+    # If db_name already has the full path (e.g., "data/test_sql_connector.db"), don't append 'data'
+    db_path = (
+        db_name
+        if os.path.isabs(db_name) or db_name.startswith("data")
+        else os.path.join("data", db_name)
+    )
+
+    print(f"🔌 Connecting to database: {db_path}")
+    return sqlite3.connect(db_path)
 
 
 # --- Table Operations ---
@@ -169,3 +177,184 @@ def read_sql_query(db_name, sql_query):
     conn.close()
     print(f"✅ Query executed successfully, retrieved {len(rows)} row(s).")
     return rows
+
+# --- Connection Management ---
+def create_connection(db_name):
+    """
+    Creates a connection to the SQLite database.
+
+    @param db_name: str : The path to the SQLite database file.
+    @return: sqlite3.Connection : The connection object to the SQLite database.
+    """
+    # Ensure the 'data' directory exists 📁
+    if not os.path.exists('data'):
+        os.makedirs('data')
+        print("📂 'data' directory created.")
+
+    db_path = os.path.join('data', db_name)
+
+    print(f"🔌 Connecting to database: {db_path}")
+    return sqlite3.connect(db_path)
+
+
+# --- List Existing Databases ---
+def list_databases():
+    """
+    Lists all the SQLite databases in the 'data' folder.
+
+    @return: list : A list of database filenames in the 'data' directory.
+    """
+    if not os.path.exists('data'):
+        print("📂 'data' directory does not exist, creating it...")
+        os.makedirs('data')
+
+    databases = [db for db in os.listdir('data') if db.endswith('.db')]
+
+    if databases:
+        print(f"📚 Found {len(databases)} database(s): {databases}")
+    else:
+        print("❌ No databases found in the 'data' directory.")
+
+    return databases
+
+
+# --- List Tables in a Database ---
+def list_tables(db_name):
+    """
+    Lists all tables in the specified SQLite database.
+
+    @param db_name: str : The name of the SQLite database file.
+    @return: list : A list of table names in the database.
+    """
+    try:
+        conn = create_connection(db_name)
+        cursor = conn.cursor()
+
+        print(f"📋 Listing all tables in database: {db_name}")
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
+
+        conn.close()
+
+        if tables:
+            print(f"✅ Found {len(tables)} table(s): {[table[0] for table in tables]}")
+            return [table[0] for table in tables]
+        else:
+            print(f"❌ No tables found in database: {db_name}")
+            return []
+
+    except sqlite3.Error as e:
+        print(f"❌ Error listing tables in database {db_name}: {e}")
+        return []
+
+
+# --- Create a New Database ---
+def create_new_database(db_name):
+    """
+    Creates a new SQLite database file in the 'data' folder if it doesn't exist.
+
+    @param db_name: str : The name of the new database file.
+    @return: None
+    """
+    db_path = os.path.join('data', db_name)
+
+    if os.path.exists(db_path):
+        print(f"⚠️ Database '{db_name}' already exists.")
+    else:
+        try:
+            conn = create_connection(db_name)
+            conn.close()
+            print(f"✅ New database '{db_name}' created successfully at: {db_path}")
+        except sqlite3.Error as e:
+            print(f"❌ Error creating database '{db_name}': {e}")
+
+
+# --- Get Table Structure (Schema) ---
+def get_table_structure(db_name, table_name):
+    """
+    Retrieves the structure (schema) of a specified table in the database.
+
+    @param db_name: str : The name of the SQLite database file.
+    @param table_name: str : The name of the table to retrieve the structure for.
+    @return: list : A list of tuples representing the columns and their properties.
+    """
+    try:
+        conn = create_connection(db_name)
+        cursor = conn.cursor()
+
+        print(f"🔍 Retrieving structure of table '{table_name}' from database: {db_name}")
+        cursor.execute(f"PRAGMA table_info({table_name});")
+        structure = cursor.fetchall()
+
+        conn.close()
+
+        if structure:
+            print(f"✅ Retrieved structure for table '{table_name}': {structure}")
+            return structure
+        else:
+            print(f"❌ No structure found for table '{table_name}' in database '{db_name}'")
+            return []
+
+    except sqlite3.Error as e:
+        print(f"❌ Error retrieving structure for table '{table_name}' in database '{db_name}': {e}")
+        return []
+
+
+# --- Check if Database Exists ---
+def database_exists(db_name):
+    """
+    Checks if the specified SQLite database exists in the 'data' folder.
+
+    @param db_name: str : The name of the SQLite database file.
+    @return: bool : True if the database exists, False otherwise.
+    """
+    db_path = os.path.join('data', db_name)
+    exists = os.path.exists(db_path)
+
+    if exists:
+        print(f"✅ Database '{db_name}' exists at: {db_path}")
+    else:
+        print(f"❌ Database '{db_name}' does not exist.")
+
+    return exists
+
+
+
+def get_db_schema(db_name):
+    """
+    Retrieves the full schema (structure) of all tables in the SQLite database.
+
+    @param db_name: str : The name of the SQLite database file.
+    @return: dict : A dictionary where the keys are table names and the values are lists of tuples representing the columns and their properties.
+    """
+    try:
+        conn = create_connection(db_name)
+        cursor = conn.cursor()
+
+        # Step 1: Retrieve all table names from the sqlite_master table
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = cursor.fetchall()
+
+        if not tables:
+            print(f"❌ No tables found in database '{db_name}'")
+            return {}
+
+        db_schema = {}
+
+        # Step 2: Loop through all tables and get their structure using PRAGMA table_info
+        for table in tables:
+            table_name = table[0]
+            cursor.execute(f"PRAGMA table_info({table_name});")
+            structure = cursor.fetchall()
+            db_schema[table_name] = structure
+
+            print(f"✅ Retrieved structure for table '{table_name}'")
+
+        # Close connection
+        conn.close()
+
+        return db_schema
+
+    except sqlite3.Error as e:
+        print(f"❌ Error retrieving database schema for '{db_name}': {e}")
+        return {}
